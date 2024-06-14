@@ -1,6 +1,6 @@
-services:
+version: '3.7'
 
-  
+services:
   # ====================================================================================================
   # ZOOKEEPER ==========================================================================================
   # ====================================================================================================
@@ -25,7 +25,6 @@ services:
 
   # ====================================================================================================
   # KAFKA ==============================================================================================
-  # ====================================================================================================
   broker01:
     image: confluentinc/cp-kafka:${CONFLUENT_VERSION}
     depends_on:
@@ -48,8 +47,6 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 100
       CONFLUENT_METRICS_ENABLE: 'false'
-    # volumes:
-    #   - ./config/kafka_init/run_workaround.sh:/tmp/run_workaround.sh
     ports:
       - 9092:9092
     mem_limit: ${MEM_LIMIT}
@@ -94,29 +91,6 @@ services:
       timeout: 10s
       retries: 10
 
-  # schema-registry:
-  #   image: confluentinc/cp-schema-registry:${CONFLUENT_VERSION}
-  #   hostname: schema-registry
-  #   container_name: schema-registry
-  #   ports:
-  #     - "8081:8081"
-  #   environment:
-  #     SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: "broker01:9093,broker02:9095"
-  #     SCHEMA_REGISTRY_HOST_NAME: schema-registry
-  #     SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
-  #   depends_on:
-  #     broker01:
-  #       condition: service_healthy
-  #     broker02:
-  #       condition: service_healthy
-  #   mem_limit: ${MEM_LIMIT}
-  #   healthcheck:
-  #     test: nc -z schema-registry 8081 || exit -1
-  #     start_period: 15s
-  #     interval: 5s
-  #     timeout: 10s
-  #     retries: 10
-
   kafka-ui:
     container_name: kafka-ui
     image: provectuslabs/kafka-ui:latest
@@ -127,21 +101,10 @@ services:
         condition: service_healthy
       broker02:
         condition: service_healthy
-      # kc01:
-      #   condition: service_healthy
-      # kc02:
-      #   condition: service_healthy
-      # schema-registry:
-      #   condition: service_healthy
     environment:
       KAFKA_CLUSTERS_0_NAME: vdt2024
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: broker01:9093,broker02:9095
       KAFKA_CLUSTERS_0_METRICS_PORT: 9090
-      # KAFKA_CLUSTERS_0_KAFKACONNECT_0_NAME: kc01
-      # KAFKA_CLUSTERS_0_KAFKACONNECT_0_ADDRESS: http://kc01:8083
-      # KAFKA_CLUSTERS_0_KAFKACONNECT_1_NAME: kc02
-      # KAFKA_CLUSTERS_0_KAFKACONNECT_1_ADDRESS: http://kc02:8083
-      # KAFKA_CLUSTERS_0_SCHEMAREGISTRY: http://schema-registry:8081
     mem_limit: ${MEM_LIMIT}
     healthcheck:
       test: nc -z kafka-ui 8080 || exit -1
@@ -152,11 +115,8 @@ services:
   
 
 
-
   # ====================================================================================================
   # NIFI ===============================================================================================
-  # ====================================================================================================
-
   nifi:
     image: apache/nifi:latest
     container_name: nifi
@@ -179,7 +139,6 @@ services:
 
   # ====================================================================================================
   # HADOOP =============================================================================================
-  # ====================================================================================================
   namenode:
     image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
     container_name: namenode
@@ -263,7 +222,6 @@ services:
 
   # # ====================================================================================================
   # # SPARK ==============================================================================================
-  # # ====================================================================================================
   sparkmaster:
     image: bde2020/spark-master:3.3.0-hadoop3.3
     container_name: sparkmaster
@@ -277,7 +235,6 @@ services:
 
   sparkworker:
     image: bde2020/spark-worker:3.3.0-hadoop3.3
-    entrypoint: ['./spark/data/entrypoint.sh']
     container_name: sparkworker
     depends_on:
       - sparkmaster
@@ -287,7 +244,6 @@ services:
       - "SPARK_MASTER=spark://sparkmaster:7077"
     volumes:
     - ./spark/spark_data:/spark/data
-    - ./output:/spark/output
 
 
 

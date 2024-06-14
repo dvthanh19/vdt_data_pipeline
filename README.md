@@ -36,7 +36,9 @@ vdt2024
 
 
 bash
-hdfs dfs -put /hadoop/data/danh_sach_sv_de.csv /raw_zone/fact
+hdfs dfs -put /hadoop_data/data/danh_sach_sv_de.csv /raw_zone/fact
 
+
+python /spark/data/spark-processing.py
 
 check lai vi tri spark output

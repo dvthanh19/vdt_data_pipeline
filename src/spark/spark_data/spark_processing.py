@@ -1,6 +1,7 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 from pyspark.sql.functions import col, sum, date_format, to_date
+import os
 
 # ---------------------------------------------------------------------------------------------------------------------------------
 # Prepare -------------------------------------------------------------------------------------------------------------------------
@@ -23,15 +24,13 @@ spark = SparkSession.builder.appName('vdt2024').getOrCreate()
 # Read CSV file -------------------------------------------------------------------------------------------------------------------
 student_df = spark.read.csv(csv_file_path, header=False, schema=student_schema)
 
-print("CSV preview:")
-student_df.printSchema()
+print("Student preview:")
 student_df.limit(5).show()
 
 # Read Parquet file----------------------------------------------------------------------------------------------------------------
 activity_df = spark.read.parquet(parquet_file_path)
 
-print("Parquet Schema:")
-activity_df.printSchema()
+print("Activity preview:")
 activity_df.limit(5).show()
 
 
@@ -42,7 +41,7 @@ raw_df = activity_df.join(student_df, activity_df['student_code'] == student_df[
 # Transform the date column -------------------------------------------------------------------------------------------------------
 transformed_df = raw_df.withColumn('date', date_format(to_date(col('timestamp'), 'M/dd/yyyy'), 'yyyyMMdd'))
 transformed_df = transformed_df.withColumnRenamed("fullname", "student_name")
-print("Number of records: ", transformed_df.count())
+
 
 # Transform the date column -------------------------------------------------------------------------------------------------------
 transformed_df.createOrReplaceTempView("temp_view")
@@ -52,14 +51,16 @@ query = """
     GROUP BY date, student_code, student_name, activity
 """
 
-# # Execute the SQL query
+# Execute the SQL query
 output_df = spark.sql(query)
-output_df.show()
+
+print("Result preview:")
+output_df.limit(5).show()
 
 
 # ---------------------------------------------------------------------------------------------------------------------------------
 # Store output --------------------------------------------------------------------------------------------------------------------
-output_df.write.option("header",True).option("delimiter",",").mode("overwrite").csv("../output")
+output_df.write.option("header",True).option("delimiter",",").mode("overwrite").csv("output")
 
 
 # ---------------------------------------------------------------------------------------------------------------------------------
