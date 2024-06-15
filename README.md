@@ -18,8 +18,15 @@ To deploy the system, ensure that you are in */src*, run:
 ```
 docker-compose -f docker-compose.yml -p demo-pipeline up -d
 ```
+*For detail, read the report please*
 
 
+
+
+
+
+.......................................................
+....dont.care.this.....................................
 
 broker01:9093,broker02:9095
 vdt2024
@@ -39,6 +46,7 @@ bash
 hdfs dfs -put /hadoop_data/data/danh_sach_sv_de.csv /raw_zone/fact
 
 
-python /spark/data/spark-processing.py
+python /spark/spark_data/spark_processing.py
+pip install pyspark
 
 check lai vi tri spark output
